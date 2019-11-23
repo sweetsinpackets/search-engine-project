@@ -19,19 +19,21 @@ def description_preprocess(det_description_text):
     # lower case
     tokens_list_lower = []
     for tokens in tokens_list:
-        tokens_list_lower.append([w.lower() for w in tokens_list])
+        tokens_list_lower.append([w.lower() for w in tokens])
 
     # remove stop words
     stop_words = set(stopwords.words('english')) 
     filtered_sentence = []
-    for tokens in tokens_list:
+    for tokens in tokens_list_lower:
         filtered_sentence.append([w for w in tokens if w not in stop_words])
 
     return filtered_sentence
 
 
+
+
 # Read data
-games = pd.read_excel("steam_modified.xlsx",index_col=0)
+games = pd.read_excel("steam_clean.xlsx",index_col=0)
 
 # Series to list
 det_description_html = games['detailed_description'].tolist()
