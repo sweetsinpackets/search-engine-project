@@ -53,7 +53,7 @@ def main():
     SR = StaticRank()
     game_df = SR.static_rank(game_df)
     game_df.sort_values(by=['static_rank'], inplace = True)
-    game_df.to_csv("ranked.csv", index = False)
+    # game_df.to_csv("ranked.csv", index = False)
 
 if __name__ == "__main__":
     main()
