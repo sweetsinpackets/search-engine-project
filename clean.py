@@ -1,5 +1,5 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-
+import os, sys, pickle, operator, pdb
 import pandas as pd
 from bs4 import BeautifulSoup
 import nltk
@@ -13,6 +13,7 @@ import scipy.sparse as sp
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 from sklearn.feature_extraction.text import _document_frequency
+import heapq
 
 '''
 https://github.com/arosh/BM25Transformer/blob/master/bm25.py
@@ -103,7 +104,7 @@ class BM25Transformer(BaseEstimator, TransformerMixin):
         return X
 
 def convert_html_to_text(html_list):
-    return [BeautifulSoup(item).get_text() for item in html_list]
+    return [BeautifulSoup(item, features="html.parser").get_text() for item in html_list]
 
 def description_preprocess(det_description_text):
     # tokenize (remove punctuation)
@@ -144,40 +145,39 @@ def get_col_index(vectorizer, term):
 def query_proprocess(q):
     return [w.lower() for w in q.split()]
 
+class Retrieval_base():
+    def __init__(self):
+        # Read data
+        self.games = pd.read_excel("steam_clean.xlsx",index_col=0)
+        # Series to list
+        det_description_html = self.games['detailed_description'].tolist()
+        # convert html to text
+        det_description_text = convert_html_to_text(det_description_html)
+        det_description_final = description_preprocess(det_description_text)
+        #tfidf, col_name, vectorizer = get_tfidf(det_description_final)
+        #tfidf_as_array = tfidf.toarray()
+        self.count_mat, self.col_name, self.vectorizer = get_count_mat(det_description_final)
+        self.BM25_vec = BM25Transformer()
+        self.BM25_vec = self.BM25_vec.fit(self.count_mat)
+        self.BM25_mat = self.BM25_vec.transform(self.count_mat)
 
-# Read data
-games = pd.read_excel("steam_clean.xlsx",index_col=0)
+def BM25_retrieval_score(query, amount):
+    try:
+        with open('Retrieval_base.pickle', 'rb') as handle:
+            Rb = pickle.load(handle)
+    except:
+        Rb = Retrieval_base()
+        with open('Retrieval_base.pickle', 'wb') as handle:
+            pickle.dump(Rb, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    query = query_proprocess(query)
+    index_list = [get_col_index(Rb.vectorizer, w) for w in query]
+    index_list = [item for item in index_list if item is not None]
+    score = np.sum(Rb.BM25_mat[:,index_list], axis=1)
+    out_game_list = heapq.nlargest(amount, enumerate(score), key=operator.itemgetter(1))
+    output = []
+    for item in out_game_list:
+        output.append((Rb.games['name'][item[0]], item[1][0,0]))
+    return output
+    
 
-# Series to list
-det_description_html = games['detailed_description'].tolist()
-
-# convert html to text
-det_description_text = convert_html_to_text(det_description_html)
-
-det_description_final = description_preprocess(det_description_text)
-
-#tfidf, col_name, vectorizer = get_tfidf(det_description_final)
-
-#tfidf_as_array = tfidf.toarray()
-
-count_mat, col_name, vectorizer = get_count_mat(det_description_final)
-
-BM25_vec = BM25Transformer()
-
-BM25_vec = BM25_vec.fit(count_mat)
-
-BM25_mat = BM25_vec.transform(count_mat)
-
-BM25_as_array = BM25_mat.toarray()
-
-query = query_proprocess('ancient egypt')
-
-index_list = [get_col_index(vectorizer, w) for w in query]
-
-score = np.sum(BM25_as_array[:,index_list], axis=1)
-
-BM25_tuples = list(zip(games['name'], score))
-
-BM25_tuples.sort(key=lambda tup: tup[1], reverse=True)
-
-print(BM25_tuples[:20])
+print(BM25_retrieval_score('Call of Duty', 10))
