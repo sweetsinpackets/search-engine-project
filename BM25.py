@@ -161,7 +161,7 @@ class Retrieval_base():
         self.BM25_vec = self.BM25_vec.fit(self.count_mat)
         self.BM25_mat = self.BM25_vec.transform(self.count_mat)
 
-def BM25_retrieval_score(query, amount):
+def BM25_retrieval_score(query, amount) -> "A list of games with best BM25 score": 
     try:
         with open('Retrieval_base.pickle', 'rb') as handle:
             Rb = pickle.load(handle)
@@ -178,6 +178,3 @@ def BM25_retrieval_score(query, amount):
     for item in out_game_list:
         output.append((Rb.games['name'][item[0]], item[1][0,0]))
     return output
-    
-
-print(BM25_retrieval_score('Call of Duty', 10))
