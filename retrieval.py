@@ -1,7 +1,7 @@
 import pandas as pd
 import sys, os, pickle, pdb
 import numpy as np
-from bm25 import BM25_retrieval_score
+from BM25 import BM25_retrieval_score
 from srank import calculate_static_rank
 
 static_weight = 20
