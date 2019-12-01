@@ -26,8 +26,7 @@ class Retrival_Interface():
         return self.base_retrieve_list
     
     def Panalize_Retrieve_List(self, index):
-        description_html = self.Rb.games[(self.Rb.games.name == self.base_retrieve_list[index][0])]['detailed_description'].values[0]
-        description_text = BeautifulSoup(description_html, features="html.parser").get_text()
+        description_text = self.Rb.games[(self.Rb.games.name == self.base_retrieve_list[index][0])]['description_text'].values[0]
         panalty_list = self.Rb.BM25_retrieval_score(description_text, 1000)
         
         for i, item in enumerate(panalty_list):
@@ -56,15 +55,15 @@ except:
         pickle.dump(Rb, handle, protocol=pickle.HIGHEST_PROTOCOL)
 Ri = Retrival_Interface(Rb, query)
 base_retrieve_list = Ri.Base_Retrieve_List()
-# for i, tup_item in enumerate(base_retrieve_list):
-#     print(i, tup_item)
-#     if i == 20:
-#         break
+for i, tup_item in enumerate(base_retrieve_list):
+    print(i, tup_item)
+    if i == 20:
+        break
 
 base_retrieve_list = Ri.Panalize_Retrieve_List(3)
-# for i, tup_item in enumerate(base_retrieve_list):
-#     print(i, tup_item)
-#     if i == 20:
-#         break
+for i, tup_item in enumerate(base_retrieve_list):
+    print(i, tup_item)
+    if i == 20:
+        break
 
 print(Ri.retrieve_detail_info(50))

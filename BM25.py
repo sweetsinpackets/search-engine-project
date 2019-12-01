@@ -149,10 +149,9 @@ class Retrieval_base():
     def __init__(self):
         # Read data
         self.games = pd.read_excel("steam_clean.xlsx",index_col=0)
+        self.games['description_text'] = self.games['detailed_description'].apply(lambda x: BeautifulSoup(x, features="html.parser").get_text())
         # Series to list
-        det_description_html = self.games['detailed_description'].tolist()
-        # convert html to text
-        det_description_text = convert_html_to_text(det_description_html)
+        det_description_text = self.games['detailed_description'].tolist()
         det_description_final = description_preprocess(det_description_text)
         #tfidf, col_name, vectorizer = get_tfidf(det_description_final)
         #tfidf_as_array = tfidf.toarray()
