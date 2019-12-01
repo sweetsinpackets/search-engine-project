@@ -161,20 +161,14 @@ class Retrieval_base():
         self.BM25_vec = self.BM25_vec.fit(self.count_mat)
         self.BM25_mat = self.BM25_vec.transform(self.count_mat)
 
-def BM25_retrieval_score(query, amount) -> "A list of games with best BM25 score": 
-    try:
-        with open('Retrieval_base.pickle', 'rb') as handle:
-            Rb = pickle.load(handle)
-    except:
-        Rb = Retrieval_base()
-        with open('Retrieval_base.pickle', 'wb') as handle:
-            pickle.dump(Rb, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    query = query_proprocess(query)
-    index_list = [get_col_index(Rb.vectorizer, w) for w in query]
-    index_list = [item for item in index_list if item is not None]
-    score = np.sum(Rb.BM25_mat[:,index_list], axis=1)
-    out_game_list = heapq.nlargest(amount, enumerate(score), key=operator.itemgetter(1))
-    output = []
-    for item in out_game_list:
-        output.append((Rb.games['name'][item[0]], item[1][0,0]))
-    return output
+    def BM25_retrieval_score(self, query, amount) -> "A list of games with best BM25 score": 
+        query = query_proprocess(query)
+        index_list = [get_col_index(self.vectorizer, w) for w in query]
+        index_list = [item for item in index_list if item is not None]
+        score = np.sum(self.BM25_mat[:,index_list], axis=1)
+        out_game_list = heapq.nlargest(amount, enumerate(score), key=operator.itemgetter(1))
+        output = []
+        for item in out_game_list:
+            output.append((self.games['name'][item[0]], item[1][0,0]))
+        return output
+    
