@@ -3,6 +3,7 @@ import sys, os, pickle, pdb
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+from BM25 import clean_game_name
 
 class StaticRank():
     def __init__(self):
@@ -46,12 +47,13 @@ def calculate_static_rank():
             ranked_game_df = pickle.load(handle)
     except:
         game_df = pd.read_excel("steam_clean.xlsx",index_col=0)
-        game_df.dropna(inplace = True)
+        # game_df.dropna(inplace = True)
         game_df['release_date'] = pd.to_datetime(game_df['release_date'])
         SR = StaticRank()
         game_df = SR.static_rank(game_df)
         game_df.sort_values(by=['static_rank'], inplace = True)
         ranked_game_df = game_df[['name', 'static_rank', 'static_score']]
+        game_df['name'] = game_df['name'].apply(lambda x: clean_game_name(x))
         with open('ranked_game_df.pickle', 'wb') as handle:
             pickle.dump(ranked_game_df, handle, protocol=pickle.HIGHEST_PROTOCOL)
     return ranked_game_df

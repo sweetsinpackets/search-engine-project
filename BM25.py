@@ -14,6 +14,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 from sklearn.feature_extraction.text import _document_frequency
 import heapq
+import re
 
 '''
 https://github.com/arosh/BM25Transformer/blob/master/bm25.py
@@ -145,11 +146,22 @@ def get_col_index(vectorizer, term):
 def query_proprocess(q):
     return [w.lower() for w in q.split()]
 
+def clean_game_name(x):
+    try:
+        x.replace('¬Æ', '')
+        x.replace(',Äôs', '')
+        x.replace(',Ñ¢', '')
+    except:
+        print("An exception occurred")
+    return x
+
+
 class Retrieval_base():
     def __init__(self):
         # Read data
         self.games = pd.read_excel("steam_clean.xlsx",index_col=0)
         self.games['description_text'] = self.games['detailed_description'].apply(lambda x: BeautifulSoup(x, features="html.parser").get_text())
+        self.games['name'] = self.games['name'].apply(lambda x: clean_game_name(x))
         # Series to list
         det_description_text = self.games['detailed_description'].tolist()
         det_description_final = description_preprocess(det_description_text)
