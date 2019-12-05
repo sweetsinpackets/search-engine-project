@@ -55,7 +55,6 @@ class Retrival_Interface():
         output['rank'] = output['name'].apply(lambda x: self.retrieved_game_list.index(x))
         output.set_index('appid', inplace = True)
         output.sort_values(by=['rank'], inplace = True)
-        pdb.set_trace()
         return output
         
 def main():

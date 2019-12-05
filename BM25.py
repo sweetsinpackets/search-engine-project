@@ -182,7 +182,16 @@ class Retrieval_base():
         out_game_list = heapq.nlargest(amount, enumerate(score), key=operator.itemgetter(1))
         output = []
         for item in out_game_list:
-            output.append((self.games['name'][item[0]], item[1][0,0]))
+            bonus_factor = self.name_matchness(self.games['name'][item[0]], query)
+            output.append((self.games['name'][item[0]], item[1][0,0] * bonus_factor))
         return output
     
-    
+    def name_matchness(self, name, query_tokens) -> 'FLOAT bonus factor':
+        match_count = 0
+        total_count = len(query_tokens)
+        for token in query_tokens:
+            if token.lower() is name.lower():
+                match_count += 1 
+        bonus_factor = (match_count/total_count) ** 2 * 0.1 + 1
+        return bonus_factor
+            
