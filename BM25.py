@@ -15,6 +15,7 @@ from sklearn.utils.validation import check_is_fitted
 from sklearn.feature_extraction.text import _document_frequency
 import heapq
 import re
+import nltk
 
 '''
 https://github.com/arosh/BM25Transformer/blob/master/bm25.py
@@ -143,8 +144,7 @@ def get_col_index(vectorizer, term):
     # get index
     return  vectorizer.vocabulary_.get(term)
 
-def query_proprocess(q):
-    return [w.lower() for w in q.split()]
+
 
 def clean_game_name(x):
     try:
@@ -175,7 +175,7 @@ class Retrieval_base():
         self.BM25_mat = self.BM25_vec.transform(self.count_mat)
 
     def BM25_retrieval_score(self, query, amount) -> "A list of games with best BM25 score": 
-        query = query_proprocess(query)
+        query = self.query_preprocess(query)
         index_list = [get_col_index(self.vectorizer, w) for w in query]
         index_list = [item for item in index_list if item is not None]
         score = np.sum(self.BM25_mat[:,index_list], axis=1)
@@ -194,4 +194,20 @@ class Retrieval_base():
                 match_count += 1 
         bonus_factor = (match_count/total_count) ** 2 * 0.01 + 1
         return bonus_factor
-            
+    
+    def query_preprocess(self, q):
+        result = []
+        word_list = [w.lower() for w in q.split()]
+        vocab = list(self.vectorizer.vocabulary_.keys())
+        for w in word_list:
+            if self.vectorizer.vocabulary_.get(w) is not None:
+                result.append(w)
+            else:
+                vocab_distance = dict()
+                for key in vocab:
+                    vocab_distance[key] = nltk.edit_distance(w, key)
+                    #vocab_distance[key] = nltk.jaccard_distance(set(w), set(key))
+                sorted_vocab_distance = sorted(vocab_distance.items(), key=lambda kv: kv[1])
+                result.append(sorted_vocab_distance[0][0])
+        return result
+
