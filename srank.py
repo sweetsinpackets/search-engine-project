@@ -53,7 +53,7 @@ def calculate_static_rank():
         game_df = SR.static_rank(game_df)
         game_df.sort_values(by=['static_rank'], inplace = True)
         ranked_game_df = game_df[['name', 'static_rank', 'static_score']]
-        game_df['name'] = game_df['name'].apply(lambda x: clean_game_name(x))
+        ranked_game_df['name'] = ranked_game_df['name'].apply(lambda x: clean_game_name(x))
         with open('ranked_game_df.pickle', 'wb') as handle:
             pickle.dump(ranked_game_df, handle, protocol=pickle.HIGHEST_PROTOCOL)
     return ranked_game_df

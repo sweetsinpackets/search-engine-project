@@ -148,9 +148,11 @@ def query_proprocess(q):
 
 def clean_game_name(x):
     try:
-        x.replace('¬Æ', '')
-        x.replace(',Äôs', '')
-        x.replace(',Ñ¢', '')
+        # if x == 'Discovery Tour by Assassin‚Äôs Creed¬Æ: Ancient Egypt':
+        #     pdb.set_trace()
+        x = x.replace('¬Æ', '')
+        x = x.replace('‚Äôs', '')
+        x = x.replace('‚Ñ¢', '')
     except:
         print("An exception occurred")
     return x
