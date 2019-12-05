@@ -26,7 +26,7 @@ class Retrival_Interface():
             self.base_retrieve_list.append((game[0], game[1] + static_score))
         self.base_retrieve_list.sort(key=lambda tup: -tup[1])
         self.retrieved_game_list = [item[0] for item in self.base_retrieve_list]
-        pdb.set_trace()
+        # pdb.set_trace()
         return self.base_retrieve_list
     
     def Panalize_Retrieve_List(self, appid):
@@ -54,7 +54,8 @@ class Retrival_Interface():
         output = self.Rb.games[(self.Rb.games.name.isin(self.retrieved_game_list[:amount]))]
         output.drop(['detailed_description', 'about_the_game','short_description', 'steamspy_tags'], axis = 1)
         output['rank'] = output['name'].apply(lambda x: self.retrieved_game_list.index(x))
-        output.set_index('rank', inplace = True)
+        output.set_index('appid', inplace = True)
+        output.sort_values(by=['rank'], inplace = True)
         return output
         
 def main():
