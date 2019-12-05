@@ -26,6 +26,7 @@ class Retrival_Interface():
             self.base_retrieve_list.append((game[0], game[1] + static_score))
         self.base_retrieve_list.sort(key=lambda tup: -tup[1])
         self.retrieved_game_list = [item[0] for item in self.base_retrieve_list]
+        pdb.set_trace()
         return self.base_retrieve_list
     
     def Panalize_Retrieve_List(self, appid):
@@ -52,11 +53,12 @@ class Retrival_Interface():
     def retrieve_detail_info(self, amount):
         output = self.Rb.games[(self.Rb.games.name.isin(self.retrieved_game_list[:amount]))]
         output.drop(['detailed_description', 'about_the_game','short_description', 'steamspy_tags'], axis = 1)
-        output = output.set_index('appid')
+        output['rank'] = output['name'].apply(lambda x: self.retrieved_game_list.index(x))
+        output.set_index('rank', inplace = True)
         return output
         
 def main():
-    query = "CS : Go"
+    query = "Dota 2"
     try:
         with open('Retrieval_base.pickle', 'rb') as handle:
             Rb = pickle.load(handle)
@@ -71,7 +73,7 @@ def main():
         print(i, tup_item)
         if i == 20:
             break
-    base_retrieve_list = Ri.Panalize_Retrieve_List(730)
+    # base_retrieve_list = Ri.Panalize_Retrieve_List(730)
     for i, tup_item in enumerate(base_retrieve_list):
         print(i, tup_item)
         if i == 20:
