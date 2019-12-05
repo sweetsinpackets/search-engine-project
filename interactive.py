@@ -12,9 +12,12 @@ class Retrival_Interface():
         self.Rb = Rb
         self.query = query
         self.panalty_weight = 3
+        self.PseudoFB_weight = 1
         self.base_retrieve_number = base_retrieve_number
         self.base_retrieve_list = None
         self.retrieved_game_list = None
+        self.PseudoFB_number = 10
+        self.PseudoFB_round = 2
 
     def Base_Retrieve_List(self):
         BM25_list = self.Rb.BM25_retrieval_score(self.query, self.base_retrieve_number)
@@ -26,8 +29,29 @@ class Retrival_Interface():
             self.base_retrieve_list.append((game[0], game[1] * static_score))
         self.base_retrieve_list.sort(key=lambda tup: -tup[1])
         self.retrieved_game_list = [item[0] for item in self.base_retrieve_list]
+        for PFB_round in range(self.PseudoFB_round):
+            self.PseudoFB_Retrieve_List()
         return self.base_retrieve_list
     
+    def PseudoFB_Retrieve_List(self):
+        for PFB_i in range(self.PseudoFB_number):
+            appid = self.Rb.games[(self.Rb.games.name == self.retrieved_game_list[PFB_i])]['appid'].values[0]
+            game_name = self.retrieved_game_list[PFB_i]
+            index = PFB_i
+            if index == None:
+                return self.base_retrieve_list
+            # pdb.set_trace()
+            description_text = self.Rb.games[(self.Rb.games.appid == appid)]['description_text'].values[0]
+            PseudoFB_list = self.Rb.BM25_retrieval_score(description_text, self.base_retrieve_number)
+            for i, item in enumerate(PseudoFB_list):
+                if item[0] in self.retrieved_game_list and item[0] != game_name:
+                    idx = self.retrieved_game_list.index(item[0])
+                    self.base_retrieve_list[idx] = (self.base_retrieve_list[idx][0], \
+                        self.base_retrieve_list[idx][1] + self.PseudoFB_weight * 2/np.log2(i + 2))
+        self.base_retrieve_list.sort(key=lambda tup: -tup[1])
+        self.retrieved_game_list = [item[0] for item in self.base_retrieve_list]
+        return self.base_retrieve_list  
+
     def Panalize_Retrieve_List(self, appid):
         game_name = self.Rb.games[(self.Rb.games.appid == appid)]['name'].values[0]
         index = None
@@ -58,7 +82,7 @@ class Retrival_Interface():
         return output
         
 def main():
-    query = "Escape"
+    query = "Ancient Egypt"
     try:
         with open('Retrieval_base.pickle', 'rb') as handle:
             Rb = pickle.load(handle)
@@ -67,13 +91,13 @@ def main():
         with open('Retrieval_base.pickle', 'wb') as handle:
             pickle.dump(Rb, handle, protocol=pickle.HIGHEST_PROTOCOL)
     Ri = Retrival_Interface(Rb, query, 1000)
-
+    
     base_retrieve_list = Ri.Base_Retrieve_List()
     for i, tup_item in enumerate(base_retrieve_list):
         print(i, tup_item)
         if i == 20:
             break
-    base_retrieve_list = Ri.Panalize_Retrieve_List(12450)
+    # base_retrieve_list = Ri.Panalize_Retrieve_List(12450)
     for i, tup_item in enumerate(base_retrieve_list):
         print(i, tup_item)
         if i == 20:
