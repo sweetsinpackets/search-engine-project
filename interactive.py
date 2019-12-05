@@ -5,7 +5,7 @@ from BM25 import Retrieval_base
 from srank import calculate_static_rank
 from bs4 import BeautifulSoup
 
-STATIC_WEIGHT = 5
+STATIC_WEIGHT = 10
 
 class Retrival_Interface():
     def __init__(self, Rb, query, base_retrieve_number):
@@ -52,10 +52,11 @@ class Retrival_Interface():
     def retrieve_detail_info(self, amount):
         output = self.Rb.games[(self.Rb.games.name.isin(self.retrieved_game_list[:amount]))]
         output.drop(['detailed_description', 'about_the_game','short_description', 'steamspy_tags'], axis = 1)
+        output = output.set_index('appid')
         return output
         
 def main():
-    query = "Portal 2"
+    query = "CS : Go"
     try:
         with open('Retrieval_base.pickle', 'rb') as handle:
             Rb = pickle.load(handle)
@@ -77,6 +78,7 @@ def main():
             break
 
     out_df = Ri.retrieve_detail_info(50)
+    print(out_df)
 
 if __name__ == "__main__":
     main()   
