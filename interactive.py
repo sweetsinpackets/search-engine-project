@@ -23,7 +23,7 @@ class Retrival_Interface():
         for game in BM25_list:
             static_rank = ranked_game_df[(ranked_game_df.name == game[0])]['static_rank'].values[0]
             static_score = STATIC_WEIGHT / np.log2(static_rank + 1)
-            self.base_retrieve_list.append((game[0], game[1] + static_score))
+            self.base_retrieve_list.append((game[0], game[1] * static_score))
         self.base_retrieve_list.sort(key=lambda tup: -tup[1])
         self.retrieved_game_list = [item[0] for item in self.base_retrieve_list]
         return self.base_retrieve_list
@@ -58,7 +58,7 @@ class Retrival_Interface():
         return output
         
 def main():
-    query = "Ancient Egypt"
+    query = "Escape"
     try:
         with open('Retrieval_base.pickle', 'rb') as handle:
             Rb = pickle.load(handle)

@@ -190,8 +190,8 @@ class Retrieval_base():
         match_count = 0
         total_count = len(query_tokens)
         for token in query_tokens:
-            if token.lower() is name.lower():
+            if token.lower() is str(name).lower():
                 match_count += 1 
-        bonus_factor = (match_count/total_count) ** 2 * 0.1 + 1
+        bonus_factor = (match_count/total_count) ** 2 * 0.01 + 1
         return bonus_factor
             

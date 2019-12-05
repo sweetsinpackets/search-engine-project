@@ -7,10 +7,11 @@ from BM25 import clean_game_name
 
 class StaticRank():
     def __init__(self):
-        self.pos_per_alpha = 0.25
-        self.num_rat_alpha = 0.25
-        self.net_pos_alpha = 0.25
-        self.freshness_alpha = 0.25
+        self.pos_per_alpha = 0.2
+        self.num_rat_alpha = 0.2
+        self.net_pos_alpha = 0.1
+        self.freshness_alpha = 0.2
+        self.mpt_alpha = 0.3
     
     def _standardize(self, df):
         df -= df.min()
@@ -20,9 +21,10 @@ class StaticRank():
     def _score_function(self, Gamedataframe):
         freshness_term = self.freshness_alpha * self._standardize(Gamedataframe['freshness'])
         percent_postive_term = self.pos_per_alpha * self._standardize(Gamedataframe['percent_positive'])
-        number_ratings_term = self.num_rat_alpha * self._standardize(np.log(Gamedataframe['number_ratings']))
-        net_positive_term = self.net_pos_alpha * self._standardize(np.log(Gamedataframe['net_positive']))
-        score_df = percent_postive_term + number_ratings_term + net_positive_term + freshness_term
+        number_ratings_term = self.num_rat_alpha * self._standardize(np.log(Gamedataframe['number_ratings'] + 1))
+        net_positive_term = self.net_pos_alpha * self._standardize(np.log(Gamedataframe['net_positive'] + 1))
+        mpt_term = self.mpt_alpha * self._standardize(np.log(Gamedataframe['median_playtime'] + 1))
+        score_df = percent_postive_term + number_ratings_term + net_positive_term + freshness_term + mpt_term
         return score_df
 
     def static_rank(self, Gamedataframe):
