@@ -173,9 +173,12 @@ class Retrieval_base():
         self.BM25_vec = BM25Transformer()
         self.BM25_vec = self.BM25_vec.fit(self.count_mat)
         self.BM25_mat = self.BM25_vec.transform(self.count_mat)
+        self.query_correction_flag = False
+        self.query = None
 
-    def BM25_retrieval_score(self, query, amount) -> "A list of games with best BM25 score": 
-        query = self.query_preprocess(query)
+    def BM25_retrieval_score(self, query, amount, auto_correction = True) -> "A list of games with best BM25 score": 
+        query = self.query_preprocess(query, auto_correction)
+        self.query = query
         index_list = [get_col_index(self.vectorizer, w) for w in query]
         index_list = [item for item in index_list if item is not None]
         score = np.sum(self.BM25_mat[:,index_list], axis=1)
@@ -195,7 +198,7 @@ class Retrieval_base():
         bonus_factor = (match_count/total_count) ** 2 * 0.01 + 1
         return bonus_factor
     
-    def query_preprocess(self, q):
+    def query_preprocess(self, q, auto_correction = True):
         result = []
         stop_words = set(stopwords.words('english')) 
 
@@ -203,11 +206,11 @@ class Retrieval_base():
         vocab = list(self.vectorizer.vocabulary_.keys())
 
         for w in word_list:
-            if self.vectorizer.vocabulary_.get(w) is not None:
+            if (self.vectorizer.vocabulary_.get(w) is not None) or (auto_correction is False):
                 result.append(w)
             else:
-                print('1')
                 vocab_distance = dict()
+                self.query_correction_flag = True
                 for key in vocab:
                     vocab_distance[key] = nltk.edit_distance(w, key)
                     #vocab_distance[key] = nltk.jaccard_distance(set(w), set(key))
