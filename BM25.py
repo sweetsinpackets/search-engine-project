@@ -197,17 +197,22 @@ class Retrieval_base():
     
     def query_preprocess(self, q):
         result = []
-        word_list = [w.lower() for w in q.split()]
+        stop_words = set(stopwords.words('english')) 
+
+        word_list = [w.lower() for w in q.split() if w not in stop_words]
         vocab = list(self.vectorizer.vocabulary_.keys())
+
         for w in word_list:
             if self.vectorizer.vocabulary_.get(w) is not None:
                 result.append(w)
             else:
+                print('1')
                 vocab_distance = dict()
                 for key in vocab:
                     vocab_distance[key] = nltk.edit_distance(w, key)
                     #vocab_distance[key] = nltk.jaccard_distance(set(w), set(key))
                 sorted_vocab_distance = sorted(vocab_distance.items(), key=lambda kv: kv[1])
                 result.append(sorted_vocab_distance[0][0])
+        
         return result
 
