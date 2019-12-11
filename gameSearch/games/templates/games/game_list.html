@@ -1,0 +1,101 @@
+<!-- <h1>Games</h1>
+<p>
+<ul>
+    {% for key, value in results.name.items %} 
+      <li>{{key}} - {{value}}</li>
+    {% endfor %}
+</ul>
+</p> -->
+
+
+<html>
+
+<head>
+  
+        <style>
+              body {
+                font: 18px 'Lucida sans', Arial, Helvetica;
+                text-align: center;
+              }
+
+                table {
+                  font-family: arial, sans-serif;
+                  border-collapse: collapse;
+                  width: 100%;
+                }
+                
+                td, th {
+                  border: 1px solid #dddddd;
+                  text-align: left;
+                  padding: 8px;
+                }
+                
+                tr:nth-child(even) {
+                  background-color: #dddddd;
+                }
+        </style>
+    
+</head>
+
+<body>
+  <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">GameSearch</a>
+        </div>
+      </div>
+  </nav>
+  {% if if_corrected %}
+    <p>Your search - <b>{{query}}</b> does not match any games, so it has been modified to <b>{{final_query}}</b></p>
+  {% endif %}
+
+  {% if suggestion_list %}
+    <p>Are you trying to search 
+      {% for item in suggestion_list %}
+        {% if forloop.last %}
+          <a href = "/search?textfield={{item}}"> {{item}}</a>?
+        {% else %}
+          <a href = "/search?textfield={{item}}"> {{item}}</a>,
+        {% endif %}
+      {% endfor %}</p>
+  {% endif %}
+
+  <h3> The output table </h3>
+
+  {% if results %}
+  <table>  
+      <!-- for each appid, i.e. the keys in second level -->
+      <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Release date	</th>
+          <th>Price</th>
+          <th>Genres</th>
+          <th>Negative ratings	</th>
+          <th>Positive ratings	</th>
+          <th>Owners</th>
+          <th>Median playtime</th>
+          <th>Description	</th>
+
+
+      </tr>
+      {% for key, value in results.items %}
+          <tr>
+              <!-- loop for each column, so it can write by row -->
+              <td>
+                <form method="POST" action="/search">
+                  {% csrf_token %}
+                  <input type = "hidden" name = "parameter" value = "{{key}}">
+                  <input type= "submit" name = "update" value="Dislike">
+                </form>
+              </td>
+              {% for item in value %}
+                  <td> {{ item }}  </td>
+              {% endfor %}
+          </tr>
+      {% endfor %}
+  </table>
+  {% endif %}
+
+</body>
+</html>
