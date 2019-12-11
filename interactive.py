@@ -5,7 +5,7 @@ from BM25 import Retrieval_base
 from srank import calculate_static_rank
 from bs4 import BeautifulSoup
 
-STATIC_WEIGHT = 10
+STATIC_WEIGHT = 8
 
 def getKeysByValues(dictOfElements, listOfValues):
     listOfKeys = list()
@@ -122,7 +122,7 @@ class Retrival_Interface():
         return output
         
 def main():
-    query = "Ancient Egypt123"
+    query = "Mount Blade"
     try:
         with open('Retrieval_base.pickle', 'rb') as handle:
             Rb = pickle.load(handle)
